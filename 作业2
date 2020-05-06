@@ -1,0 +1,76 @@
+数据挖掘第三次作业
+王思懿 2017141011017
+1、给定下列训练数据集，其中最后一列为类标。
+
+（1）请计算属性“Continent”对该数据集的信息增益。
+以最后一列为类标：E(D)= -3/ 12* log2 (3/12) - 5/ 12* log2 (5/12) - 2/12*log2(2/12) -2/12*log2(2/12) =1.888
+SA：2， E(sa)= -1*log2(1)=0，
+Aus：1 ，E(aus)= -1*log2(1)=0，
+NA：3 ， E(na)= -1/3*log2(1/3) -2/3*log2(2/3)=0.918，
+Eur：4，E(eur)= -3/4*log2(3/4) -1/4*log2(1/4)=0.811，
+Asia：2，E(asia)= -1/2*log2(1/2) -1/2*log2(1/2)=1
+∴信息增益为E(D) - 2/12* E(sa) - 1/12*E(aus) - 3/12*E(na) - 4/12*E(eur) -2/12 * E(asia) =1.221
+（2）对于属性“Population”，如果离散化为两个区间的阈值点选择在70，该属性的信息增益是多少？
+<70：7个，E(d)= -3/7*log2 (3/7) -2/7*log2 (2/7)- 1/ 7 * log2(1/7) - 1/7*log2(1/7)
+>70： 5个，E(g)=  -2/5* log2(2/5)- 1/5 *log2(1/5) - 1/5* log2(1/5) - 1/5* log2(1/5)
+E(D)pop=7/12*E(d)+ 5/12*E(g)=1.876
+信息增益为E(D)- E(D)pop=0.012
+2、文本分类的多项式朴素贝叶斯方法假定每个类别的文本按照多项式分布生成。请给出该方法训练和测试过程的伪代码。
+
+代码解释：C为类别集合，D为用于训练的文本文件集合，d为文档
+TrainMultiNomialNB(C,D)
+ {
+V←ExtractVocabulary(D)// 单词出现多次，只算一个
+N←CountTokens(D) // 单词可重复计算
+for each c∈C//类别集合中某类别单词的总数
+Nc←CountTokensInClass(D,c)
+prior[c]←Nc/N
+textc←ConcatenateTextOfAllDocsInClass(D,c)//文档处理为字符串
+for each t∈V// 计算单词t的出现次数
+Tct←CountTokensOfTerm(textc,t)
+for each t∈V//计算P(t|c)
+condprob[t][c]←
+return V,prior,condprob
+}
+ApplyMultiNomialNB(C,V,prior,condprob,d)
+ {
+W←ExtractTokensFromDoc(V,d)
+for each c∈C
+score[c]←prior[c]
+for each t∈W
+if t∈Vd
+score[c] *= condprob[t][c]
+return max(score[c])
+}
+
+
+
+3、给定如下训练数据集，请采用朴素贝叶斯方法对实例（a = m，b = q）进行分类。要求进行平滑，取0.5（也叫ELE估计方法，expected likelihood estimator）。
+A	B	Class
+m	b	t
+m	s	t
+g	q	t
+g	s	t
+g	q	t
+g	q	f
+g	q	f
+h	b	f
+h	q	f
+m	b	f
+
+P(t | m,q)=P(m,q | t)*P(t) / P(m,q)
+=P(m | t)*P(q | t)*P(t) / P(m)*P(q)
+P(f | m,q)=P(m,q | f )*P( f ) / P(m,q)
+=P(m | f )*P(q | f )*P( f ) / P(m)*P(q)
+class中t：5，f：5，共10；A中m：3，非m：7，共10；B中q: 5，非q：5，共10.
+P(m | t) = 2.5/（2.5+0.5*3）= 0.625
+P(q | t) = 2.5/（2.5+0.5*3）= 0.625
+P(m) = 3.5/（3.5+0.5*7）= 0.5
+P(q) = 5.5/（5.5+0.5*5）= 0.55
+P(t) = 5.5/（5.5+0.5*5）= 0.55
+P( f ) = 5.5/（5.5+0.5*5）= 0.55
+P(m | f ) = 1.5/（1.5 + 0.5*4）= 0.429
+P(q | f ) = 3.5/（3.5+0.5*2）= 0.778
+∴P(t | m,q)=0.625*0.625*0.55/0.5*0.55=0.78125
+P(f | m,q)=0.429*0.778*0.55/0.5*0.55=0.667524
+因此（a = m，b = q）应为t类
